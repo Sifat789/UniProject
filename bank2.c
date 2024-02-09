@@ -5,6 +5,7 @@
 #include <conio.h>
 #include <time.h>
 
+int checkAccPass(int a, char *password);
 void admin();
 void login();
 void Register();
@@ -18,7 +19,7 @@ void view();
 void del();
 int verify(); // for verifying admin and user
 int checkAccNum(int a);
-int checkAccBalWithAccNum(int a);
+int checkAccBalWithAccNum(int a, char *password);
 void depsitOrWithdrawl(int IsDeposit);
 
 COORD coord = {0, 0};
@@ -38,7 +39,7 @@ struct record
     char UserID[10];
 } rec;
 
-void gotoxy(int a, int b)
+void moveIt(int a, int b)
 {
     coord.X = a;
     coord.Y = b;
@@ -63,16 +64,17 @@ int main()
         fpAllusers = fopen("collection.txt", "w");
     }
 
-    system("color f4");
-    gotoxy(43, 4);
+    system("color 0A");
+
+    moveIt(43, 4);
     printf(" WELCOME TO TBC BANKING SYSTEM ");
-    gotoxy(50, 8);
+    moveIt(50, 8);
     printf("ACCOUNT TYPE");
-    gotoxy(44, 10);
-    printf("[1] . ADMINISTRATOR ");
-    gotoxy(44, 11);
-    printf("[2] . USER ");
-    gotoxy(44, 14);
+    moveIt(44, 10);
+    printf("1. Admin");
+    moveIt(44, 11);
+    printf("2. User");
+    moveIt(44, 14);
     printf("Enter Your Choice .... ");
     scanf("%d", &m);
     if (m != 1 && m != 2)
@@ -87,14 +89,23 @@ int main()
 
 void admin()
 {
-    system("color f4");
-    gotoxy(43, 4);
-    printf(" WELCOME TO TBC BANKING SYSTEM ");
+    system("color 0A");
+
+    moveIt(43, 4);
+    printf("WELCOME TO BBB BANKING SYSTEM \n");
     int loginOrResigterChoice;
-    printf("[1] . Login\n");
-    printf("[2] . Register\n");
-    printf("Please choose one: ");
-    scanf("%d", &loginOrResigterChoice);
+    if (m == 2)
+    {
+        moveIt(43, 6);
+        printf("[1] . Login\n");
+        moveIt(43, 7);
+        printf("[2] . Register\n");
+        moveIt(43, 9);
+        printf("Please choose one: ");
+        scanf("%d", &loginOrResigterChoice);
+    }
+    else
+        loginOrResigterChoice = 1;
 
     if (loginOrResigterChoice == 2)
     {
@@ -114,7 +125,7 @@ void admin()
         else if (verify() == 0)
         {
             system("CLS");
-            gotoxy(43, 16);
+            moveIt(43, 16);
             printf("Incorrect Username / Password !!!!");
             admin();
         }
@@ -125,17 +136,19 @@ void admin()
 
 void login()
 {
+    system("cls");
     int i = 0;
-    gotoxy(44, 10);
+    moveIt(44, 10);
     printf("Enter The Username : ");
     scanf(" %[^\n]", inputUserName);
-    gotoxy(44, 12);
+    moveIt(44, 12);
     printf("Enter The Password : ");
     scanf(" %[^\n]", password);
 }
 
 void Register()
 {
+    system("cls");
     char fname[50], lname[50], currentUserName[50], pass[50], Username[50];
     int accNum, balance, userNameFound = 0;
 
@@ -206,9 +219,9 @@ int verify()
     {
         if ((strcmp(inputUserName, "admin") == 0 && strcmp(password, "admin") == 0))
         {
-            gotoxy(38, 16);
+            moveIt(38, 16);
             printf("You Have Successfully Logged In : \" %s \" ", inputUserName);
-            gotoxy(44, 20);
+            moveIt(44, 20);
             printf("Press any key to continue .... ");
             getch();
             return 1;
@@ -261,9 +274,9 @@ int verify()
 
         if (userFound)
         {
-            gotoxy(38, 16);
+            moveIt(38, 16);
             printf("You Have Successfully Logged In : \" %s \" ", inputUserName);
-            gotoxy(44, 20);
+            moveIt(44, 20);
             printf("Press any key to continue .... ");
             getch();
             return 1;
@@ -278,20 +291,20 @@ int verify()
 void menu()
 {
     system("CLS");
-    gotoxy(48, 4);
+    moveIt(48, 4);
     printf("WELCOME TO MAIN MENU");
-    gotoxy(44, 8);
+    moveIt(44, 8);
     printf("[1] . View Customer Accounts");
-    gotoxy(44, 11);
+    moveIt(44, 9);
     printf("[2] . Delete Customer Account");
-    gotoxy(44, 12);
+    moveIt(44, 10);
     printf("[3] . Search Customer Account");
-    gotoxy(44, 13);
+    moveIt(44, 11);
     printf("[4] . Transaction");
-    gotoxy(44, 14);
-    printf("[5] . Log Out !!! ");
-    gotoxy(43, 20);
-    printf("Please Enter Your Choice [1-5] : ");
+    moveIt(44, 12);
+    printf("[5] . Log Out\n");
+    moveIt(44, 20);
+    printf("Please Enter Your Choice [1-5] : \n");
     option();
 }
 
@@ -299,6 +312,7 @@ void menu()
 void option()
 {
     int choice;
+    moveIt(44, 21);
     scanf("%d", &choice);
     system("CLS");
     switch (choice)
@@ -362,7 +376,7 @@ int checkAccNum(int a)
         return 0;
     }
     // check whether we have reached end of file or not
-    while (fscanf(fpAllusers, "%d %s %s %s %s %d\n", &accNum, currentUserName, fname, lname, pass, &balance) != 0)
+    while (fscanf(fpAllusers, "%d %s %s %s %s %d\n", &accNum, currentUserName, fname, lname, pass, &balance) != EOF)
     {
         if (a == accNum)
         {
@@ -374,7 +388,9 @@ int checkAccNum(int a)
     return 0;
 }
 
-int checkAccBalWithAccNum(int a)
+
+// check password
+int checkAccPass(int a,char *password)
 {
 
     char fname[50], lname[50], currentUserName[50], pass[50], Username[50];
@@ -386,9 +402,33 @@ int checkAccBalWithAccNum(int a)
         return 0;
     }
     // check whether we have reached end of file or not
-    while (fscanf(fpAllusers, "%d %s %s %s %s %d\n", &accNum, currentUserName, fname, lname, pass, &balance) != 0)
+    while (fscanf(fpAllusers, "%d %s %s %s %s %d\n", &accNum, currentUserName, fname, lname, pass, &balance) != EOF)
     {
-        if (a == accNum)
+        if (a==accNum && strcmp(pass, password)==0)
+        {
+            fclose(fpAllusers);
+            return 1;
+        }
+    }
+    fclose(fpAllusers);
+    return 0;
+}
+
+int checkAccBalWithAccNum(int a, char *password)
+{
+
+    char fname[50], lname[50], currentUserName[50], pass[50], Username[50];
+    int accNum, balance;
+    fpAllusers = fopen("collection.txt", "r");
+    if (fpAllusers == NULL)
+    {
+        printf("file opening failed at checkAccNum function\n");
+        return 0;
+    }
+    // check whether we have reached end of file or not
+    while (fscanf(fpAllusers, "%d %s %s %s %s %d\n", &accNum, currentUserName, fname, lname, pass, &balance) != EOF)
+    {
+        if (a == accNum && strcmp(pass, password) == 0)
         {
             fclose(fpAllusers);
             return balance;
@@ -400,19 +440,24 @@ int checkAccBalWithAccNum(int a)
 // delete an account
 void del()
 {
-    int a;
-    gotoxy(48, 4);
+    int a, userFound = 0;
+    char Password[50];
+    moveIt(48, 4);
     printf(" DELETE CUSTOMER ACCOUNT ");
-    gotoxy(41, 9);
+    moveIt(41, 9);
     printf("Enter Your Account Number To Delete : ");
     scanf("%d", &a);
-    gotoxy(48, 4);
+    moveIt(41, 10);
+    printf("Enter password : ");
+    scanf("%s", Password);
+    moveIt(48, 4);
 
     FILE *tmpcollection;
     if (checkAccNum(a) == 1)
     {
         char fname[50], lname[50], currentUserName[50], pass[50], Username[50];
-        int accNum, balance, userNameFound = 0;
+        int accNum, balance;
+        userFound = 1;
 
         tmpcollection = fopen("tmpcollection.txt", "a");
         fpAllusers = fopen("collection.txt", "r");
@@ -462,20 +507,19 @@ void del()
         {
             printf("deletion of tmpcollection failed at del function");
         }
+
+        moveIt(44, 15);
+        printf("CUSTOMER ACCOUNT DELETED SUCCESSFULLY");
     }
     else
     {
+        system("cls");
+        moveIt(42, 8);
         printf("Account doesn't exist.\n");
-        gotoxy(42, 18);
-        printf("Press any key to return back to main menu. ");
-        getch();
-        menu();
     }
 
-    gotoxy(44, 15);
-    printf("CUSTOMER ACCOUNT DELETED SUCCESSFULLY");
-    gotoxy(42, 18);
-    printf("Press any key to return back to main menu. ");
+    moveIt(42, 18);
+    printf("Press any key to return....... ");
     getch();
     menu();
 }
@@ -484,49 +528,75 @@ void del()
 void search()
 {
     char username[50];
-    int a,accNum, balance;
+    int a, accNum, balance;
+    moveIt(42, 4);
     printf("Please provide either of the two:\n");
+    moveIt(44, 8);
     printf("1. Username: \n");
+    moveIt(44, 9);
     printf("2. Account Number: \n");
-    printf("Choose one: \n");
+    moveIt(44, 11);
+    printf("Choose one: ");
     int choice;
+    moveIt(56, 11);
     scanf("%d", &choice);
     if (choice == 1)
     {
+        system("cls");
+        moveIt(44, 8);
         printf("Username of the account holder: ");
         scanf("%s", username);
     }
     else if (choice == 2)
     {
+        system("cls");
+        moveIt(44, 8);
         printf("Account number of the holder: ");
-        scanf("%d", a);
+        scanf("%d", &a);
     }
-    else {
+    else
+    {
+        system("cls");
+        moveIt(44, 8);
         printf("Invalid input.\n");
         search();
     }
 
+    system("cls");
+
     char fname[50], lname[50], currentUserName[50], pass[50], Username[50];
+    int userFound = 0;
 
     fpAllusers = fopen("collection.txt", "r");
     if (fpAllusers == NULL)
     {
+        moveIt(44, 12);
         printf("file opening failed at view(admin) function\n");
         return;
     }
 
-    printf(" %-8s %-20s %-49s %-20s\n\n", "A/C", "Username", "Name", "Balance");
     while (fscanf(fpAllusers, "%d %s %s %s %s %d\n", &accNum, currentUserName, fname, lname, pass, &balance) != EOF)
     {
-        if (strcmp(username, currentUserName) == 0 || a==accNum)
+        if (strcmp(username, currentUserName) == 0 || a == accNum)
         {
+            moveIt(4, 4);
+            printf(" %-8s %-20s %-49s %-20s\n\n", "A/C", "Username", "Name", "Balance");
+            moveIt(4, 5);
             printf("%-9d %-20s %-49s %-20d\n", accNum, currentUserName, strcat(strcat(fname, " "), lname), balance);
+            userFound = 1;
         }
+    }
+
+    if (!userFound)
+    {
+        moveIt(46, 8);
+        printf("User doesn't exist.\n");
     }
 
     fclose(fpAllusers);
 
     printf("\n\n");
+    moveIt(46, 12);
     printf("Press any key to return......");
     getch();
     menu();
@@ -536,25 +606,25 @@ void search()
 void transaction()
 {
     system("CLS");
-    gotoxy(48, 4);
+    moveIt(48, 4);
     printf(" TRANSACTION MENU ");
-    gotoxy(49, 9);
+    moveIt(49, 9);
     printf("[1] . Balance Inquiry");
-    gotoxy(49, 10);
+    moveIt(49, 10);
     printf("[2] . Cash Deposit");
-    gotoxy(49, 11);
+    moveIt(49, 11);
     printf("[3] . Cash Withdrawal");
     if (m == 1)
     {
-        gotoxy(49, 12);
+        moveIt(49, 12);
         printf("[4] . Main Menu");
     }
     else
     {
-        gotoxy(49, 12);
+        moveIt(49, 12);
         printf("[4] . Exit");
     }
-    gotoxy(45, 17);
+    moveIt(45, 17);
     printf("Please Enter Your Choice [1-4] : ");
     int choice;
     scanf("%d", &choice);
@@ -588,27 +658,31 @@ void transaction()
 void balanceInquiry()
 {
     int a;
-    gotoxy(48, 4);
+    char Password[50];
+    moveIt(48, 4);
     printf(" BALANCE INQUIRY ");
-    gotoxy(47, 12);
+    moveIt(47, 12);
     printf("Enter Your Account Number : ");
     scanf("%d", &a);
+    moveIt(47, 13);
+    printf("Enter Password : ");
+    scanf("%s", &Password);
     if (checkAccNum(a) == 1)
     {
-        int availableBal = checkAccBalWithAccNum(a);
+        int availableBal = checkAccBalWithAccNum(a, Password);
         system("cls");
-        gotoxy(52, 15);
+        moveIt(44, 10);
         printf("Your Account balance is %d.\n", availableBal);
     }
 
     else
     {
         system("cls");
-        gotoxy(52, 15);
+        moveIt(44, 10);
         printf("Account Doesn't Exist.");
         transaction();
     }
-    gotoxy(46, 21);
+    moveIt(42, 18);
     printf("Press any key to return back to main menu. ");
     getch();
     transaction();
@@ -617,14 +691,21 @@ void balanceInquiry()
 //  adding or withdrawing amount to a account
 void depsitOrWithdrawl(int IsDeposit)
 {
-    int a, bal;
-    gotoxy(48, 4);
+    int a, bal, isValidAcc;
+    char Password[50];
+    moveIt(48, 4);
     printf("Enter Your Account Number : ");
     scanf("%d", &a);
     printf("Enter Amount : ");
     scanf("%d", &bal);
+    if (!IsDeposit)
+    {
+        printf("Enter password:");
+        scanf("%s", Password);
+        isValidAcc = checkAccPass(a,Password);
+    } else isValidAcc = checkAccNum(a);
     FILE *tmpcollection;
-    if (checkAccNum(a) == 1)
+    if (isValidAcc)
     {
         char fname[50], lname[50], currentUserName[50], pass[50], Username[50];
         int accNum, balance, userNameFound = 0;
@@ -704,30 +785,30 @@ void depsitOrWithdrawl(int IsDeposit)
             printf("Deposited successfully.\n");
         else
             printf("Withdrawn successfully.\n");
-        gotoxy(42, 18);
+        moveIt(42, 18);
         printf("Press any key to return...... ");
         getch();
         transaction();
     }
     else
     {
-        printf("Account doesn't exist.\n");
-        gotoxy(42, 18);
+        printf("Invalid Info.\n");
+        moveIt(42, 18);
         printf("Press any key to return...... ");
         getch();
         transaction();
     }
 }
 
-//logging out of the program.
+// logging out of the program.
 void menuexit()
 {
     system("cls");
-    gotoxy(48, 10);
-    printf("!!! THANK YOU !!!");
-    gotoxy(50, 12);
-    printf("USER :: %s", inputUserName);
+    moveIt(48, 10);
+    printf("Thank You for being with us.");
+    moveIt(48, 12);
+    printf("User :: %s", inputUserName);
     getch();
-    gotoxy(0, 26);
+    moveIt(0, 26);
     exit(0);
 }
